@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+    <meta charset="utf-8">
+    
+    
+    <title>select、poll、epoll的区别 | 人生苦短，我用Python | 不想做架构的码农不是好司机</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="keywords" content="Linux">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.css">
+    <link rel="stylesheet" href="/css/style.css?v=1.3.2">
+    
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}'),
+            g: JSON.parse('{"enable":false,"lazy":true,"owner":"codefine","repo":"gitment","oauth":{"client_id":null,"client_secret":null},"perPage":10}'),
+            d: JSON.parse('{"app_id":null}')
+        };
+    </script>
+    <script type="text/javascript">
+        window.lazyScripts=[];
+    </script>
+    
+</head>
+
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/pro.jpg">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">煜立王冠</h5>
+          <a href="mailto:18370808967@163.com" title="18370808967@163.com" class="mail">
+            
+              <span>1</span>
+            
+              <span>8</span>
+            
+              <span>3</span>
+            
+              <span>7</span>
+            
+              <span>0</span>
+            
+              <span>8</span>
+            
+              <span>0</span>
+            
+              <span>8</span>
+            
+              <span>9</span>
+            
+              <span>6</span>
+            
+              <span>7</span>
+            
+              <span>@</span>
+            
+              <span>1</span>
+            
+              <span>6</span>
+            
+              <span>3</span>
+            
+              <span>.</span>
+            
+              <span>c</span>
+            
+              <span>o</span>
+            
+              <span>m</span>
+            
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://github.com/chengyuer" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/">
+                <i class="icon icon-lg icon-home"></i>
+                HOME
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories">
+                <i class="icon icon-lg icon-th-list"></i>
+                CATEGORIES
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags">
+                <i class="icon icon-lg icon-tags"></i>
+                TAGS
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives">
+                <i class="icon icon-lg icon-archives"></i>
+                ARCHIVES
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/custom">
+                <i class="icon icon-lg icon-plus-square"></i>
+                CUSTOM
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>select、poll、epoll的区别</span>
+            
+        </div>
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg">
+    <div class="container fade-scale">
+        <h1 class="title">select、poll、epoll的区别</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2017-05-09T06:33:12.000Z" itemprop="datePublished" class="page-time">
+  2017-05-09
+</time>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left">
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-select、poll、epoll的区别" class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">select、poll、epoll的区别</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017-05-09 14:33:12" datetime="2017-05-09T06:33:12.000Z" itemprop="datePublished">2017-05-09</time>
+
+            
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<h2 id="select、poll、epoll之间的区别总结-整理"><a href="#select、poll、epoll之间的区别总结-整理" class="headerlink" title="select、poll、epoll之间的区别总结[整理]"></a><a href="https://chengyuer.github.io/2017/05/09/select、poll、epoll的区别/">select、poll、epoll之间的区别总结[整理]</a></h2><p>select，poll，epoll都是IO多路复用的机制。I/O多路复用就通过一种机制，可以监视多个描述符，一旦某个描述符就绪（一般是读就绪或者写就绪），能够通知程序进行相应的读写操作。但select，poll，epoll本质上都是同步I/O，因为他们都需要在读写事件就绪后自己负责进行读写，也就是说这个读写过程是阻塞的，而异步I/O则无需自己负责进行读写，异步I/O的实现会负责把数据从内核拷贝到用户空间。关于这三种IO多路复用的用法，前面三篇总结写的很清楚，并用服务器回射echo程序进行了测试。连接如下所示：<br>select：<a href="http://www.cnblogs.com/Anker/archive/2013/08/14/3258674.html" target="_blank" rel="noopener">http://www.cnblogs.com/Anker/archive/2013/08/14/3258674.html</a></p>
+<p>poll：<a href="http://www.cnblogs.com/Anker/archive/2013/08/15/3261006.html" target="_blank" rel="noopener">http://www.cnblogs.com/Anker/archive/2013/08/15/3261006.html</a></p>
+<p>epoll：<a href="http://www.cnblogs.com/Anker/archive/2013/08/17/3263780.html" target="_blank" rel="noopener">http://www.cnblogs.com/Anker/archive/2013/08/17/3263780.html</a><br>今天对这三种IO多路复用进行对比，参考网上和书上面的资料，整理如下：<br><strong>1、select实现</strong></p>
+<p><strong>select的调用过程如下所示:</strong><br><figure class="image-box">
+                <a rel="select、poll、epoll的区别" href="./img/1.png" title="undefined" data-fancybox="images"><img src="./img/1.png" alt="" title="" class=""></a>
+                <p></p>
+            </figure><br>（1）使用copy_from_user从用户空间拷贝fd_set到内核空间</p>
+<p>（2）注册回调函数__pollwait</p>
+<p>（3）遍历所有fd，调用其对应的poll方法（对于socket，这个poll方法是sock_poll，sock_poll根据情况会调用到tcp_poll,udp_poll或者datagram_poll）</p>
+<p>（4）以tcp_poll为例，其核心实现就是__pollwait，也就是上面注册的回调函数。</p>
+<p>（5）__pollwait的主要工作就是把current（当前进程）挂到设备的等待队列中，不同的设备有不同的等待队列，对于tcp_poll来说，其等待队列是sk-&gt;sk_sleep（注意把进程挂到等待队列中并不代表进程已经睡眠了）。在设备收到一条消息（网络设备）或填写完文件数据（磁盘设备）后，会唤醒设备等待队列上睡眠的进程，这时current便被唤醒了。</p>
+<p>（6）poll方法返回时会返回一个描述读写操作是否就绪的mask掩码，根据这个mask掩码给fd_set赋值。</p>
+<p>（7）如果遍历完所有的fd，还没有返回一个可读写的mask掩码，则会调用schedule_timeout是调用select的进程（也就是current）进入睡眠。当设备驱动发生自身资源可读写后，会唤醒其等待队列上睡眠的进程。如果超过一定的超时时间（schedule_timeout指定），还是没人唤醒，则调用select的进程会重新被唤醒获得CPU，进而重新遍历fd，判断有没有就绪的fd。</p>
+<p>（8）把fd_set从内核空间拷贝到用户空间。<br><strong>总结：</strong><br><strong>select的几大缺点：</strong></p>
+<p>（1）每次调用select，都需要把fd集合从用户态拷贝到内核态，这个开销在fd很多时会很大</p>
+<p>（2）同时每次调用select都需要在内核遍历传递进来的所有fd，这个开销在fd很多时也很大</p>
+<p>（3）select支持的文件描述符数量太小了，默认是1024<br><strong>2 、poll实现</strong></p>
+<p>　　poll的实现和select非常相似，只是描述fd集合的方式不同，poll使用pollfd结构而不是select的fd_set结构，其他的都差不多。</p>
+<p>关于select和poll的实现分析，可以参考下面几篇博文：<br><a href="http://blog.csdn.net/lizhiguo0532/article/details/6568964#comments" target="_blank" rel="noopener">http://blog.csdn.net/lizhiguo0532/article/details/6568964#comments</a></p>
+<p><a href="http://blog.csdn.net/lizhiguo0532/article/details/6568968" target="_blank" rel="noopener">http://blog.csdn.net/lizhiguo0532/article/details/6568968</a></p>
+<p><a href="http://blog.csdn.net/lizhiguo0532/article/details/6568969" target="_blank" rel="noopener">http://blog.csdn.net/lizhiguo0532/article/details/6568969</a></p>
+<p><a href="http://www.ibm.com/developerworks/cn/linux/l-cn-edntwk/index.html?ca=drs-" target="_blank" rel="noopener">http://www.ibm.com/developerworks/cn/linux/l-cn-edntwk/index.html?ca=drs-</a></p>
+<p><a href="http://linux.chinaunix.net/techdoc/net/2009/05/03/1109887.shtml" target="_blank" rel="noopener">http://linux.chinaunix.net/techdoc/net/2009/05/03/1109887.shtml</a></p>
+<p><strong>3、epoll</strong><br>epoll既然是对select和poll的改进，就应该能避免上述的三个缺点。那epoll都是怎么解决的呢？在此之前，我们先看一下epoll和select和poll的调用接口上的不同，select和poll都只提供了一个函数——select或者poll函数。而epoll提供了三个函数，epoll_create,epoll_ctl和epoll_wait，epoll_create是创建一个epoll句柄；epoll_ctl是注册要监听的事件类型；epoll_wait则是等待事件的产生。</p>
+<p>　　对于第一个缺点，epoll的解决方案在epoll_ctl函数中。每次注册新的事件到epoll句柄中时（在epoll_ctl中指定EPOLL_CTL_ADD），会把所有的fd拷贝进内核，而不是在epoll_wait的时候重复拷贝。epoll保证了每个fd在整个过程中只会拷贝一次。</p>
+<p>　　对于第二个缺点，epoll的解决方案不像select或poll一样每次都把current轮流加入fd对应的设备等待队列中，而只在epoll_ctl时把current挂一遍（这一遍必不可少）并为每个fd指定一个回调函数，当设备就绪，唤醒等待队列上的等待者时，就会调用这个回调函数，而这个回调函数会把就绪的fd加入一个就绪链表）。epoll_wait的工作实际上就是在这个就绪链表中查看有没有就绪的fd（利用schedule_timeout()实现睡一会，判断一会的效果，和select实现中的第7步是类似的）。</p>
+<p>　　对于第三个缺点，epoll没有这个限制，它所支持的FD上限是最大可以打开文件的数目，这个数字一般远大于2048,举个例子,在1GB内存的机器上大约是10万左右，具体数目可以cat /proc/sys/fs/file-max察看,一般来说这个数目和系统内存关系很大。<br><strong>总结：</strong></p>
+<p>（1）select，poll实现需要自己不断轮询所有fd集合，直到设备就绪，期间可能要睡眠和唤醒多次交替。而epoll其实也需要调用epoll_wait不断轮询就绪链表，期间也可能多次睡眠和唤醒交替，但是它是设备就绪时，调用回调函数，把就绪fd放入就绪链表中，并唤醒在epoll_wait中进入睡眠的进程。虽然都要睡眠和交替，但是select和poll在“醒着”的时候要遍历整个fd集合，而epoll在“醒着”的时候只要判断一下就绪链表是否为空就行了，这节省了大量的CPU时间。这就是回调机制带来的性能提升。</p>
+<p>（2）select，poll每次调用都要把fd集合从用户态往内核态拷贝一次，并且要把current往设备等待队列中挂一次，而epoll只要一次拷贝，而且把current往等待队列上挂也只挂一次（在epoll_wait的开始，注意这里的等待队列并不是设备等待队列，只是一个epoll内部定义的等待队列）。这也能节省不少的开销。<br><strong>参考资料：</strong></p>
+<p><a href="http://www.cnblogs.com/apprentice89/archive/2013/05/09/3070051.html" target="_blank" rel="noopener">http://www.cnblogs.com/apprentice89/archive/2013/05/09/3070051.html</a></p>
+<p><a href="http://www.linuxidc.com/Linux/2012-05/59873p3.htm" target="_blank" rel="noopener">http://www.linuxidc.com/Linux/2012-05/59873p3.htm</a><br><a href="http://xingyunbaijunwei.blog.163.com/blog/static/76538067201241685556302/" target="_blank" rel="noopener">http://xingyunbaijunwei.blog.163.com/blog/static/76538067201241685556302/</a></p>
+<p><a href="http://blog.csdn.net/kkxgx/article/details/7717125" target="_blank" rel="noopener">http://blog.csdn.net/kkxgx/article/details/7717125</a></p>
+<p><a href="https://banu.com/blog/2/how-to-use-epoll-a-complete-example-in-c/epoll-example.c" target="_blank" rel="noopener">https://banu.com/blog/2/how-to-use-epoll-a-complete-example-in-c/epoll-example.c</a></p>
+
+        </div>
+        
+<blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    Last updated: <time datetime="2018-11-29T06:59:25.984Z" itemprop="dateUpdated">2018-11-29 14:59:25</time>
+</span><br>
+
+
+        
+        转载注明出处，原文地址：<a href="/2017/05/09/select、poll、epoll的区别/" target="_blank" rel="external">https://chengyuer.github.io/2017/05/09/select、poll、epoll的区别/</a>
+        
+    </div>
+    <footer>
+        <a href="https://chengyuer.github.io">
+            <img src="/img/pro.jpg" alt="煜立王冠">
+            煜立王冠
+        </a>
+    </footer>
+</blockquote>
+
+        
+            <div class="page-reward">
+    <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-circle waves-light">赏</a>
+</div>
+
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux/">Linux</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://chengyuer.github.io/2017/05/09/select、poll、epoll的区别/&title=《select、poll、epoll的区别》 — 人生苦短，我用Python&pic=https://chengyuer.github.io/img/pro.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://chengyuer.github.io/2017/05/09/select、poll、epoll的区别/&title=《select、poll、epoll的区别》 — 人生苦短，我用Python&source=专注于Python各项应用与实践" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+            
+
+
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between flex-row-reverse">
+  
+
+  
+    <div class="next">
+      <a href="/2017/03/15/与Python进阶/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">与Python进阶</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#select、poll、epoll之间的区别总结-整理"><span class="post-toc-number">1.</span> <span class="post-toc-text">select、poll、epoll之间的区别总结[整理]</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </div></div></aside>
+    
+</article>
+
+    <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        觉得好你就扫个码
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/img/ma.png" alt="打赏二维码">
+        </div>
+        
+    </div>
+</div>
+
+    
+
+</div>
+
+        <footer class="footer">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/chengyuer" target="_blank">HOME</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+        <p>
+            <span>
+                煜立王冠 &copy; 2017 - 2018
+            </span>
+        		
+           	
+            
+            
+            <span>
+	            Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/codefine/hexo-theme-mellow" target="_blank">mellow</a>
+            </span>
+            
+            
+            
+
+            
+                
+<span class="site-uv" title="总访客量">
+    <i class="icon icon-user"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_uv"></i>
+</span>
+
+
+<span class="site-pv" title="总访问量">
+    <i class="icon icon-eye"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_pv"></i>
+</span>
+
+            
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://chengyuer.github.io/2017/05/09/select、poll、epoll的区别/&title=《select、poll、epoll的区别》 — 人生苦短，我用Python&pic=https://chengyuer.github.io/img/pro.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://chengyuer.github.io/2017/05/09/select、poll、epoll的区别/&title=《select、poll、epoll的区别》 — 人生苦短，我用Python&source=专注于Python各项应用与实践" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAN4AAADeCAAAAAB3DOFrAAACp0lEQVR42u3awU6FQAwFUP//p3VrovBu2ylhcVi9yBPmYMLU2359xcf3r+P3T+6///d374+r7yd3HB14eHh4g6Unt7y62dXZ5PPVXXqPDA8PD+8ZXnK5yZaQ/OT+ISZrwMPDw3s/b15qJ2vI74KHh4f3Zt6kBP9QBI8fBx4eHt4zvLy0nccHvYB4PWvBw8PDi3l5F+k9n1f6e3h4eHjjrnre2u8tIt8qmqvFw8PDW+DlC8ox86ZXtXD/8E08PDy8B3nJQnuwyRhBEgfj4eHh7fHypU9e2fko1Xx4q5wi4+Hh4bWmoeYv+vmIwORxFP6GeHh4eMu8vBlWGIEqbie9s3h4eHh7vDwYPVvsJhnJ4TACDw8P7xBvr6mflLy9kdPqJoSHh4d3lpdcujcosBH1VkMTPDw8vA1eUjRXt4RJyNtbSTnGxcPDwxvwki/lEUBepidX6D2sy6wFDw8P7xBv3gbLY4ty2FqMSFa6fHh4eHjjFlf+Ku+VztXyuhDm4uHh4T3C68Wm1VC4t1UUmnB4eHh4R3nVVv2k3ZUPS506i4eHh7fH6xXWG8MBk7jkQzGNh4eHd4g3af8XXtCDKHYy1oCHh4e3zVu5dPw48uZZOcLAw8PDW+DdX+LUJlGNJM4W/Xh4eHhneXmZm48R9LaTagMs2h7w8PDwlnnJSz/ZAPKCuzpwUL4jHh4e3jKvPLFVfKHn1+xdrbmH4OHh4RVHB/IjfynnEUZ1lKFwdzw8PLwFXu8l3osw8ui2OqQ131Tw8PDwqrx8M7gvZCehRq/ZFgUfeHh4eGu8ZOnJ57OPqRdD/BPj4uHh4b2Gl7e75iNWvZYYHh4e3ht4vYmmfAOYjzLg4eHhPcPrRQP3V5if7d0dDw8Pb5s3+Ye/1+DPYZMSHw8PD2+B9wNxAXOobFmThwAAAABJRU5ErkJggg==" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="//cdn.bootcss.com/jquery/2.1.0/jquery.min.js"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.3.2"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.3.2"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.js"></script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+
+<script type="text/javascript" src="/js/method.js?v=1.3.2"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.3.2"></script>
+
+<!-- third-party -->
+
+
+
+
+
+
+
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.3.2"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) {
+		search_path = "search.xml";
+	}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script>
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+    
+    
+
+
+
+
+
+    <!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+
+    <script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = '别走 ！';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+
+
+
+
+
+    
+</body>
+</html>
