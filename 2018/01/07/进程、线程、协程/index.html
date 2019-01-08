@@ -263,24 +263,23 @@
 <ol>
 <li>每个线程一定会有一个名字，尽管上面的例子中没有指定线程对象的name，但是python会自动为线程指定一个名字。</li>
 <li>当线程的run()方法结束时该线程完成。</li>
-<li>无法控制线程调度程序，但可以通过别的方式来影响线程调度的方式。<br>上面的例子只是简单的演示了创建了线程、主动挂起以及退出线程。下一节，将讨论用互斥锁进行线程同步。<h2 id="线程相关函数"><a href="#线程相关函数" class="headerlink" title="线程相关函数"></a>线程相关函数</h2></li>
-<li>Event<figure class="image-box">
+<li>无法控制线程调度程序，但可以通过别的方式来影响线程调度的方式。<br>上面的例子只是简单的演示了创建了线程、主动挂起以及退出线程。下一节，将讨论用互斥锁进行线程同步。<h2 id="线程相关函数"><a href="#线程相关函数" class="headerlink" title="线程相关函数"></a>线程相关函数</h2>. Event<figure class="image-box">
                 <a rel="进程、线程、协程" href="./img/2.png" title="undefined" data-fancybox="images"><img src="./img/2.png" alt="" title="" class=""></a>
                 <p></p>
-            </figure></li>
-<li>Condition<figure class="image-box">
+            </figure>
+. Condition<figure class="image-box">
                 <a rel="进程、线程、协程" href="./img/3.png" title="undefined" data-fancybox="images"><img src="./img/3.png" alt="" title="" class=""></a>
                 <p></p>
-            </figure></li>
-<li>Semapore<figure class="image-box">
+            </figure>
+. Semapore<figure class="image-box">
                 <a rel="进程、线程、协程" href="./img/4.png" title="undefined" data-fancybox="images"><img src="./img/4.png" alt="" title="" class=""></a>
                 <p></p>
-            </figure></li>
-<li>Timer<figure class="image-box">
+            </figure>
+. Timer<figure class="image-box">
                 <a rel="进程、线程、协程" href="./img/5.png" title="undefined" data-fancybox="images"><img src="./img/5.png" alt="" title="" class=""></a>
                 <p></p>
-            </figure></li>
-<li>TLS<figure class="image-box">
+            </figure>
+. TLS<figure class="image-box">
                 <a rel="进程、线程、协程" href="./img/6.png" title="undefined" data-fancybox="images"><img src="./img/6.png" alt="" title="" class=""></a>
                 <p></p>
             </figure>
@@ -307,9 +306,7 @@
 <p>运行结果: </p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">哈哈1---num=1</span><br><span class="line">哈哈2---num=1</span><br></pre></td></tr></table></figure>
 <blockquote>
-<blockquote>
 <p>总结：<br>    • 多进程中，每个进程中所有数据（包括全局变量）都各有拥有一份，互不影响</p>
-</blockquote>
 </blockquote>
 
         </div>
@@ -318,7 +315,7 @@
     <div class="content">
         
 <span class="post-time">
-    Last updated: <time datetime="2019-01-08T10:32:29.263Z" itemprop="dateUpdated">2019-01-08 18:32:29</time>
+    Last updated: <time datetime="2019-01-08T10:36:16.081Z" itemprop="dateUpdated">2019-01-08 18:36:16</time>
 </span><br>
 
 
