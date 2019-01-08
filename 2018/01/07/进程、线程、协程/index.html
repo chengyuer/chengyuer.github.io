@@ -333,9 +333,9 @@
 <p>import subprocess<br>child = subprocess.Popen([“cat”], stdin=subprocess.PIPE)<br>child.communicate(“vamei”)  </p>
 <p>我们启动子进程之后，cat会等待输入，直到我们用communicate()输入”vamei”。<br>通过使用subprocess包，我们可以运行外部程序。这极大的拓展了Python的功能。<br>如果你已经了解了操作系统的某些应用，你可以从Python中直接调用该应用(而不是完全依赖Python)，并将应用的结果输出给Python，并让Python继续处理。<br>shell的功能(比如利用文本流连接各个应用)，就可以在Python中实现。</p>
 <h2 id="multiprocessing模块"><a href="#multiprocessing模块" class="headerlink" title="multiprocessing模块"></a>multiprocessing模块</h2><p>如果你打算编写多进程的服务程序，Unix/Linux无疑是正确的选择。由于Windows没有fork调用，难道在Windows上无法用Python编写多进程的程序？<br>由于Python是跨平台的，自然也应该提供一个跨平台的多进程支持。multiprocessing模块就是跨平台版本的多进程模块。<br>multiprocessing模块提供了一个Process类来代表一个进程对象，下面的例子演示了启动一个子进程并等待其结束：</p>
-<p>#coding=utf-8<br>from multiprocessing import Process<br>import os<br>def run_proc(name):<br>    print(‘子进程运行中，name= %s ,pid=%d…’ % (name, os.getpid()))<br>if <strong>name</strong>==’<strong>main</strong>‘:<br>    print(‘父进程 %d.’ % os.getpid())<br>    p = Process(target=run_proc, args=(‘test’,))<br>    print(‘子进程将要执行’)<br>    p.start()<br>    p.join()<br>    print(‘子进程已结束’)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">#coding=utf-8</span><br><span class="line">from multiprocessing import Process</span><br><span class="line">import os</span><br><span class="line">def run_proc(name):</span><br><span class="line">    print(&apos;子进程运行中，name= %s ,pid=%d...&apos; % (name, os.getpid()))</span><br><span class="line">if __name__==&apos;__main__&apos;:</span><br><span class="line">    print(&apos;父进程 %d.&apos; % os.getpid())</span><br><span class="line">    p = Process(target=run_proc, args=(&apos;test&apos;,))</span><br><span class="line">    print(&apos;子进程将要执行&apos;)</span><br><span class="line">    p.start()</span><br><span class="line">    p.join()</span><br><span class="line">    print(&apos;子进程已结束&apos;)</span><br></pre></td></tr></table></figure>
 <p>运行结果: </p>
-<p>父进程 14116.<br>子进程将要执行<br>子进程运行中，name= test ,pid=25456…<br>子进程已结束</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">父进程 14116.</span><br><span class="line">子进程将要执行</span><br><span class="line">子进程运行中，name= test ,pid=25456...</span><br><span class="line">子进程已结束</span><br></pre></td></tr></table></figure>
 <p>说明<br>    • 创建子进程时，只需要传入一个执行函数和函数的参数，创建一个Process实例，用start()方法启动，这样创建进程比fork()还要简单。<br>    • join()方法可以等待子进程结束后再继续往下运行，通常用于进程间的同步。</p>
 
         </div>
@@ -344,7 +344,7 @@
     <div class="content">
         
 <span class="post-time">
-    Last updated: <time datetime="2019-01-08T11:04:46.093Z" itemprop="dateUpdated">2019-01-08 19:04:46</time>
+    Last updated: <time datetime="2019-01-08T11:06:44.993Z" itemprop="dateUpdated">2019-01-08 19:06:44</time>
 </span><br>
 
 
